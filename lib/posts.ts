@@ -16,7 +16,9 @@ function fromApi(post: ApiPost): Post {
  if (!status) throw new Error(`Status artikel tidak dikenali: ${post.status}`);
  return { id: String(post.id), title: post.title, content: post.content, category: post.category, status, date: post.created_date.slice(0, 10) };
 }
-const api = axios.create({ baseURL: '/api/backend/article', timeout: 20000 });
+const backendUrl = (process.env.NEXT_PUBLIC_API_BASE_URL || (process.env.NODE_ENV === 'production'
+ ? 'https://submission.metrolabs.site' : 'http://127.0.0.1:8081')).replace(/\/+$/, '');
+const api = axios.create({ baseURL: `${backendUrl}/article`, timeout: 20000 });
 async function request<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
  try {
   const response = await api.request<T>({ url: path || '/', method, data: body });

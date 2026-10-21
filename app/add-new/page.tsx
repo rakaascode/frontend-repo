@@ -1,2 +1,4 @@
-import { ArticleForm } from '@/components/article-form';
-export default function AddNew() {return <ArticleForm/>;}
+import { ArticleForm } from "@/components/article-form";
+export default function AddNew() {
+  return <ArticleForm />;
+}

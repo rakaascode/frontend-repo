@@ -20,14 +20,14 @@ cp .env.example .env.local
 npm run dev
 ```
 
-`.env.example` mengatur `API_BASE_URL=https://submission.metrolabs.site`.
+`.env.example` mengatur `NEXT_PUBLIC_API_BASE_URL=https://submission.metrolabs.site`.
 Untuk kembali ke backend lokal, ubah `.env.local` menjadi:
 
 ```dotenv
-API_BASE_URL=http://127.0.0.1:8081
+NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8081
 ```
 
-Restart server Next.js setelah mengubah environment. Variabel ini hanya dibaca server; browser mengakses proxy `/api/backend` pada origin frontend sehingga tidak memerlukan CORS backend.
+Browser mengakses backend langsung. Backend harus mengaktifkan CORS untuk origin frontend. Restart server development setelah mengubah environment. URL ini bersifat publik dan dimasukkan ke bundle saat build; lakukan build ulang jika URL production berubah.
 
 ## Fitur
 
@@ -47,6 +47,6 @@ npm run build
 npm start
 ```
 
-Production secara default memakai `https://submission.metrolabs.site`. `API_BASE_URL` dapat diatur untuk mengganti backend pada development maupun production. Jika `.env.local` masih berisi URL lokal, nilai tersebut juga digunakan saat production; ubah ke URL VPS sesuai kebutuhan.
+Production secara default memakai `https://submission.metrolabs.site`. `NEXT_PUBLIC_API_BASE_URL` dapat diatur untuk mengganti backend pada development maupun production. Jika `.env.local` masih berisi URL lokal, nilai tersebut juga digunakan saat production; ubah ke URL VPS sesuai kebutuhan.
 
-Frontend membutuhkan runtime server Next.js untuk proxy API, sehingga tidak menggunakan static export. Atur `API_BASE_URL` melalui environment penyedia hosting jika diperlukan.
+Atur `NEXT_PUBLIC_API_BASE_URL` melalui environment penyedia hosting sebelum menjalankan build. Backend Go harus dideploy dengan konfigurasi CORS agar browser dapat mengakses API langsung.
