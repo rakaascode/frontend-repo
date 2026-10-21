@@ -1,5 +1,5 @@
+import axios from 'axios';
 export type Status = 'Published' | 'Drafts' | 'Trashed';
-
 export type Post = {
  id: string;
  title: string;
@@ -8,12 +8,38 @@ export type Post = {
  status: Status;
  date: string;
 };
-
-export const initialPosts: Post[] = [
- { id: '1', title: 'Belajar dasar HTML', category: 'Pemrograman', status: 'Published', date: '2023-10-21', content: 'HTML digunakan untuk menyusun struktur halaman web. Elemen yang sering dipakai antara lain heading, paragraf, tautan, dan gambar.\n\nDengan memahami struktur HTML, kita bisa membuat halaman yang lebih mudah dibaca dan dikembangkan.' },
- { id: '2', title: 'Mengatur tampilan dengan CSS', category: 'Pemrograman', status: 'Published', date: '2023-10-20', content: 'CSS digunakan untuk mengatur warna, ukuran teks, jarak, dan tata letak halaman.\n\nMedia query membantu menyesuaikan tampilan agar tetap nyaman digunakan pada layar ponsel maupun komputer.' },
- { id: '3', title: 'Mengenal useState', category: 'React', status: 'Published', date: '2023-10-19', content: 'useState menyimpan data yang dapat berubah di dalam komponen. Saat state berubah, React memperbarui tampilan sesuai nilai terbaru.\n\nContohnya adalah menyimpan nilai input atau tab yang sedang dipilih.' },
- { id: '4', title: 'Menyimpan data di browser', category: 'JavaScript', status: 'Published', date: '2023-10-18', content: 'localStorage dapat digunakan untuk menyimpan data sederhana di browser. Data tetap tersedia setelah halaman dimuat ulang.\n\nObjek perlu diubah menjadi string dengan JSON.stringify sebelum disimpan dan dibaca kembali menggunakan JSON.parse.' },
- { id: '5', title: 'Catatan belajar Next.js', category: 'Next.js', status: 'Drafts', date: '2023-10-17', content: 'Next.js menyediakan routing berdasarkan struktur folder. Catatan ini masih akan dilengkapi dengan contoh halaman dan navigasi.' },
- { id: '6', title: 'Contoh artikel lama', category: 'Umum', status: 'Trashed', date: '2023-10-16', content: 'Artikel ini sudah dipindahkan ke Trashed.' },
-];
+type ApiPost = { id: number; title: string; content: string; category: string; status: string; created_date: string };
+const statusToApi: Record<Status, string> = { Published: 'publish', Drafts: 'draft', Trashed: 'thrash' };
+function fromApi(post: ApiPost): Post {
+ const statuses: Record<string, Status> = { publish: 'Published', published: 'Published', draft: 'Drafts', drafts: 'Drafts', thrash: 'Trashed', trash: 'Trashed', trashed: 'Trashed' };
+ const status = statuses[post.status.toLowerCase()];
+ if (!status) throw new Error(`Status artikel tidak dikenali: ${post.status}`);
+ return { id: String(post.id), title: post.title, content: post.content, category: post.category, status, date: post.created_date.slice(0, 10) };
+}
+const api = axios.create({ baseURL: '/api/backend/article', timeout: 20000 });
+async function request<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
+ try {
+  const response = await api.request<T>({ url: path || '/', method, data: body });
+  return response.data;
+ } catch (error) {
+  if (axios.isAxiosError<{ error?: string }>(error)) {
+   throw new Error(error.response?.data?.error || 'Permintaan ke backend gagal. Coba lagi.');
+  }
+  throw error;
+ }
+}
+export async function loadPosts(): Promise<Post[]> {
+ const posts: Post[] = [];
+ const limit = 100;
+ for (let offset = 0; ; offset += limit) {
+  const batch = await request<ApiPost[]>(`/${limit}/${offset}`);
+  posts.push(...batch.map(fromApi));
+  if (batch.length < limit) return posts;
+ }
+}
+export async function savePost(post: Post, create = false): Promise<Post> {
+ const data = await request<{ data: ApiPost }>(create ? '' : `/${post.id}`, create ? 'POST' : 'PUT', {
+  title: post.title, content: post.content, category: post.category, status: statusToApi[post.status],
+ });
+ return fromApi(data.data);
+}

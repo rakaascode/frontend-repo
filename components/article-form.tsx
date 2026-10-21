@@ -5,10 +5,22 @@ import { useRouter } from 'next/navigation';
 import { usePosts } from './dashboard';
 import type { Status } from '@/lib/posts';
 export function ArticleForm({ id }: { id?: string }) {
- const { posts, ready, save } = usePosts(); const router = useRouter(); const [title,setTitle] = useState(''); const [content,setContent] = useState(''); const [category,setCategory] = useState(''); const [error,setError] = useState(''); const titleRef = useRef<HTMLInputElement>(null); const contentRef = useRef<HTMLTextAreaElement>(null); const categoryRef = useRef<HTMLInputElement>(null); const initialized = useRef(false); const existing = posts.find(p => p.id === id);
+ const { posts, ready, error: loadError, save } = usePosts(); const router = useRouter(); const [title,setTitle] = useState(''); const [content,setContent] = useState(''); const [category,setCategory] = useState(''); const [error,setError] = useState(''); const [saving,setSaving] = useState(false); const titleRef = useRef<HTMLInputElement>(null); const contentRef = useRef<HTMLTextAreaElement>(null); const categoryRef = useRef<HTMLInputElement>(null); const initialized = useRef(false); const existing = posts.find(p => p.id === id);
  useEffect(() => {if (ready && !initialized.current) { if (existing) {setTitle(existing.title);setContent(existing.content);setCategory(existing.category);} initialized.current=true; titleRef.current?.focus();}}, [ready,existing]);
- function submit(status: Status) { if (!title.trim()) {setError('Judul wajib diisi.');titleRef.current?.focus();return;} if (!content.trim()) {setError('Isi artikel wajib diisi.');contentRef.current?.focus();return;} if (!category.trim()) {setError('Kategori wajib diisi.');categoryRef.current?.focus();return;} save({id: existing?.id ?? crypto.randomUUID(),title:title.trim(),content:content.trim(),category:category.trim(),status,date:new Date().toISOString().slice(0,10)}); router.push('/'); }
+ async function submit(status: Status) {
+  if (saving) return;
+  if (Array.from(title.trim()).length < 20) {setError('Judul minimal 20 karakter.');titleRef.current?.focus();return;}
+  if (Array.from(content.trim()).length < 20) {setError('Isi artikel minimal 20 karakter.');contentRef.current?.focus();return;}
+  if (Array.from(category.trim()).length < 3) {setError('Kategori minimal 3 karakter.');categoryRef.current?.focus();return;}
+  setError(''); setSaving(true);
+  try {
+   await save({id: existing?.id ?? '',title:title.trim(),content:content.trim(),category:category.trim(),status,date:existing?.date ?? ''});
+   router.push('/');
+  } catch (err) { setError(err instanceof Error ? err.message : 'Gagal menyimpan artikel.'); }
+  finally { setSaving(false); }
+ }
  if (!ready) return <div className="empty-state">Memuat artikel...</div>;
+ if (loadError) return <p>Form belum tersedia karena artikel gagal dimuat.</p>;
  if (id && !existing) return <><h2>Artikel tidak ditemukan</h2><Link href="/">Kembali ke All Posts</Link></>;
  return (
   <section>
@@ -22,8 +34,8 @@ export function ArticleForm({ id }: { id?: string }) {
     <input id="category" ref={categoryRef} value={category} onChange={e => setCategory(e.target.value)} required />
     {error && <p className="error" role="alert">{error}</p>}
     <div className="form-actions">
-     <button type="submit" className="primary">Publish</button>
-     <button type="button" onClick={() => submit('Drafts')}>Draft</button>
+     <button type="submit" className="primary" disabled={saving}>{saving ? 'Menyimpan...' : 'Publish'}</button>
+     <button type="button" disabled={saving} onClick={() => submit('Drafts')}>Draft</button>
     </div>
    </form>
   </section>
