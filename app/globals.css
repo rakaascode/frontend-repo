@@ -1,0 +1,42 @@
+* { box-sizing: border-box; }
+body { margin: 0; background: #fff; color: #222; font: 14px Arial, sans-serif; }
+.container { max-width: 960px; margin: 40px auto; padding: 0 20px; }
+h2 { margin: 28px 0 20px; font-size: 20px; }
+h3 { margin: 0 0 12px; font-size: 18px; }
+nav { display: flex; gap: 20px; padding-bottom: 16px; border-bottom: 1px solid #ddd; }
+a { color: #245da8; }
+nav a { text-decoration: none; }
+nav a[aria-current="page"] { font-weight: bold; text-decoration: underline; text-underline-offset: 4px; }
+button, input, textarea { font: inherit; }
+button { padding: 9px 14px; border: 1px solid #ccc; border-radius: 4px; background: #f7f7f7; color: #222; cursor: pointer; }
+button:hover:not(:disabled) { background: #ececec; }
+button:disabled { opacity: .45; cursor: default; }
+button:focus-visible, a:focus-visible { outline: 2px solid #245da8; outline-offset: 3px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; }
+.tabs button[aria-selected="true"], button.primary { background: #245da8; border-color: #245da8; color: #fff; }
+.tabs button[aria-selected="true"]:hover, button.primary:hover { background: #1c4b88; }
+.table-scroll { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; text-align: left; }
+th, td { padding: 13px 16px; border: 1px solid #ddd; }
+th { background: #f5f5f5; }
+th:last-child { width: 110px; }
+.row-actions { display: flex; gap: 12px; }
+.icon-button { display: inline-flex; align-items: center; justify-content: center; padding: 5px; background: transparent; border: 0; color: #555; }
+form { max-width: 700px; }
+label { display: block; margin: 20px 0 8px; }
+input, textarea { width: 100%; padding: 10px; border: 1px solid #bbb; border-radius: 4px; color: #222; background: #fff; }
+input:focus, textarea:focus { outline: 2px solid #245da8; outline-offset: 1px; }
+textarea { resize: vertical; }
+.form-actions { display: flex; gap: 10px; margin-top: 20px; }
+.error { color: #b42318; }
+article { padding: 22px 0; border-bottom: 1px solid #ddd; }
+article h3, td { overflow-wrap: anywhere; }
+.category { color: #666; font-size: 13px; }
+.article-content { white-space: pre-wrap; line-height: 1.7; overflow-wrap: anywhere; }
+.pagination { display: flex; gap: 16px; align-items: center; justify-content: center; margin: 24px 0; }
+@media (max-width: 600px) {
+ .container { margin: 24px auto; padding: 0 16px; }
+ th, td { padding: 10px; }
+ .pagination { gap: 10px; font-size: 12px; }
+ .pagination button { padding: 8px; }
+}
